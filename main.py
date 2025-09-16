@@ -5,8 +5,10 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from rich.logging import RichHandler
 
-from api.exceptions import NoSuchEntityException
-from api.routes import contacts
+from src.api.exceptions import NoSuchEntityException
+from src.api.routes import contacts
+from src.api.routes.auth import router as auth_router
+from src.api.routes.users import router as users_router
 
 app = FastAPI()
 
@@ -20,6 +22,8 @@ async def handle_no_such_entity(request, exc):
 
 
 app.include_router(contacts.router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
