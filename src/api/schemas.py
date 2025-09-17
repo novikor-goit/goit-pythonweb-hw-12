@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, EmailStr, PastDate, ConfigDict
+from pydantic import BaseModel, Field, EmailStr, PastDate, ConfigDict, HttpUrl
 
 
 class HTTPError(BaseModel):
@@ -48,4 +48,5 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     is_confirmed: bool
+    avatar: HttpUrl | None
     model_config = ConfigDict(from_attributes=True)

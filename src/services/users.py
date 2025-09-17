@@ -27,3 +27,7 @@ class UserService:
             user.is_confirmed = True
             await self.repository.save(user)
         return user
+
+    async def update_field(self, user: User, field: str, value: str) -> User:
+        setattr(user, field, value)
+        return await self.repository.save(user)

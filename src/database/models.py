@@ -15,6 +15,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     is_confirmed: Mapped[bool] = mapped_column(default=False)
+    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         "created_at", DateTime(timezone=True), default=func.now()
     )

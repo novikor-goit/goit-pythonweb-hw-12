@@ -20,6 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.exception_handler(NoSuchEntityException)
 async def handle_no_such_entity(request, exc):
     return JSONResponse(

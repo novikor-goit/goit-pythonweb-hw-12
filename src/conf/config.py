@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DB_USER: str
-    DB_PASSWORD: str
+    DB_PASSWORD: SecretStr
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
@@ -23,8 +23,11 @@ class Settings(BaseSettings):
     MAIL_FROM_NAME: str = "Test App"
     MAIL_STARTTLS: bool = False
     MAIL_SSL_TLS: bool = False
-    USE_CREDENTIALS: bool = False
-    VALIDATE_CERTS: bool = False
+    MAIL_USE_CREDENTIALS: bool = False
+    MAIL_VALIDATE_CERTS: bool = False
+    CLOUDINARY_CLOUD_NAME: str
+    CLOUDINARY_API_KEY: str
+    CLOUDINARY_API_SECRET: SecretStr
 
     model_config = SettingsConfigDict(env_file=".env")
 
