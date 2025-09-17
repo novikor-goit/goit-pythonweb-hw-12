@@ -24,16 +24,22 @@ async def register_user(
     db: AsyncSession = Depends(get_db),
 ):
     user_service = UserService(db)
-    user = None
     try:
-        user = await user_service.get_by_username(data.username)
-    except NoSuchEntityException:
-        ...
-    if user:
+        await user_service.get_by_username(data.username)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this username already exists",
         )
+    except NoSuchEntityException:
+        ...
+    try:
+        await user_service.get_by_email(str(data.email))
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists",
+        )
+    except NoSuchEntityException:
+        ...
     data.password = crypt.hash(data.password)
     user = await user_service.create(data)
     send_email_in_background(

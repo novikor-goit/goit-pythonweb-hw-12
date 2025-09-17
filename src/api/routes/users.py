@@ -1,4 +1,4 @@
-from cloudinary.exceptions import BadRequest
+from cloudinary.exceptions import BadRequest  # type: ignore[import-untyped]
 from fastapi import APIRouter, Depends, Request, UploadFile, File, HTTPException
 from slowapi import Limiter
 from slowapi.util import get_remote_address
