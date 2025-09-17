@@ -37,12 +37,15 @@ class AccessTokenResponse(BaseModel):
 
 class UserCreate(BaseModel):
     username: str = Field(..., max_length=50)
+    email: EmailStr = Field(..., max_length=255)
     password: str
 
 
 class UserResponse(BaseModel):
     id: int
     username: str
+    email: EmailStr
     created_at: datetime
     updated_at: datetime
+    is_confirmed: bool
     model_config = ConfigDict(from_attributes=True)

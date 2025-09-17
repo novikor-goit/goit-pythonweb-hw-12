@@ -17,3 +17,13 @@ class UserService:
 
     async def get_by_username(self, username: str) -> User:
         return await self.repository.get_by_username(username)
+
+    async def get_by_email(self, email: str) -> User:
+        return await self.repository.get_by_email(email)
+
+    async def confirm_email(self, email: str) -> User:
+        user = await self.get_by_email(email)
+        if not user.is_confirmed:
+            user.is_confirmed = True
+            await self.repository.save(user)
+        return user

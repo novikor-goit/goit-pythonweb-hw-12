@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.exceptions import NoSuchEntityException
 from src.database.models import User
 from src.database.session_manager import get_db
-from src.services.crypt import decode_access_token
+from src.services.crypt import decode_jwt_token
 from src.services.users import UserService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -22,7 +22,7 @@ async def get_current_user(
     )
 
     try:
-        payload = decode_access_token(token)
+        payload = decode_jwt_token(token)
         username = payload["sub"]
         if username is None:
             raise credentials_exception

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Confirmation</title>
+</head>
+<body>
+<p>Hello {{ username }},</p>
+<p>Please confirm your email by clicking the link below:</p>
+<p>
+    <a href="{{ base_url }}/api/auth/email/confirm/{{ token }}">
+        Confirm your email
+    </a>
+</p>
+</body>
+</html>

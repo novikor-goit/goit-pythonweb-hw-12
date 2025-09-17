@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks, Request
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,14 +7,22 @@ from src.api.exceptions import NoSuchEntityException
 from src.api.schemas import UserCreate, UserResponse, AccessTokenResponse
 from src.conf.config import settings
 from src.database.session_manager import get_db
-from src.services.crypt import crypt, create_access_token
+from src.services.crypt import crypt, create_jwt_token, decode_jwt_token
+from src.services.email import send_email_in_background
 from src.services.users import UserService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=UserResponse)
-async def register_user(data: UserCreate, db: AsyncSession = Depends(get_db)):
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
+async def register_user(
+    data: UserCreate,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
     user_service = UserService(db)
     user = None
     try:
@@ -28,6 +36,9 @@ async def register_user(data: UserCreate, db: AsyncSession = Depends(get_db)):
         )
     data.password = crypt.hash(data.password)
     user = await user_service.create(data)
+    send_email_in_background(
+        data.email, user.username, request.base_url, background_tasks
+    )
     return user
 
 
@@ -43,7 +54,12 @@ async def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(
+    if not user.is_confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Please confirm your email first",
+        )
+    access_token = create_jwt_token(
         sub=user.username, lifetime_minutes=settings.ACCESS_TOKEN_LIFETIME_MINUTES
     )
     return AccessTokenResponse(
@@ -51,3 +67,15 @@ async def login(
         token_type="bearer",
         expires_in=settings.ACCESS_TOKEN_LIFETIME_MINUTES * 60,
     )
+
+
+@router.get("/email/confirm/{token}", response_model=UserResponse)
+async def confirm_email(token: str, db: AsyncSession = Depends(get_db)):
+    email: str = decode_jwt_token(token)["sub"]
+    service = UserService(db)
+    try:
+        return await service.confirm_email(email)
+    except NoSuchEntityException:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )

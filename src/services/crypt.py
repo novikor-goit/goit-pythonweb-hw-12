@@ -9,19 +9,20 @@ from src.conf.config import settings
 crypt = CryptContext(schemes=[settings.CRYPT_ALGORITHM], deprecated="auto")
 
 
-def create_access_token(
+def create_jwt_token(
     sub: str,
-    lifetime_minutes: int,
+    lifetime_minutes: Optional[int] = None,
     data: Optional[dict] = None,
 ) -> str:
     if data is None:
         data = {}
-    expire = datetime.now(UTC) + timedelta(minutes=lifetime_minutes)
-    jwt_data = {"sub": sub, "exp": expire, **data}
-    jwt_data.update({"exp": expire})
+    jwt_data = {"sub": sub, "iat": datetime.now(UTC), **data}
+    if lifetime_minutes is not None:
+        jwt_data["exp"] = datetime.now(UTC) + timedelta(minutes=lifetime_minutes)
+
     token = jwt.encode(jwt_data, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
     return token
 
 
-def decode_access_token(token: str) -> dict:
+def decode_jwt_token(token: str) -> dict:
     return jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
