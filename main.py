@@ -22,10 +22,10 @@ app.add_middleware(
 
 
 @app.exception_handler(NoSuchEntityException)
-async def handle_no_such_entity(request, exc):
+async def handle_no_such_entity(request, exc: NoSuchEntityException):
     return JSONResponse(
         status_code=404,
-        content={"message": f"No such entity with ID {exc.entity_id}"},
+        content={"message": f"{exc.message}"},
     )
 
 

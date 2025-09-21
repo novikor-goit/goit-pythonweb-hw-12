@@ -16,6 +16,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     is_confirmed: Mapped[bool] = mapped_column(default=False)
     avatar: Mapped[str] = mapped_column(String(255), nullable=True)
+    role: Mapped[str] = mapped_column(String(50), default="user")
     created_at: Mapped[datetime] = mapped_column(
         "created_at", DateTime(timezone=True), default=func.now()
     )
@@ -23,6 +24,18 @@ class User(Base):
         "updated_at", DateTime(timezone=True), default=func.now(), onupdate=func.now()
     )
     contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="user")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "is_confirmed": self.is_confirmed,
+            "avatar": self.avatar,
+            "role": self.role,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }
 
 
 class Contact(Base):
@@ -41,3 +54,16 @@ class Contact(Base):
     updated_at: Mapped[datetime] = mapped_column(
         "updated_at", DateTime(timezone=True), default=func.now(), onupdate=func.now()
     )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "phone": self.phone,
+            "birthday": str(self.birthday),
+            "user_id": self.user_id,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+        }

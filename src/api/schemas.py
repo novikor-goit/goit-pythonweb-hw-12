@@ -16,7 +16,7 @@ class ContactUpdate(BaseModel):
     last_name: str = Field(..., max_length=50)
     email: EmailStr
     phone: str = Field(..., max_length=20)
-    birthday: PastDate | None
+    birthday: PastDate | None = None
 
 
 class ContactCreate(ContactUpdate):
@@ -31,6 +31,7 @@ class ContactModel(ContactUpdate, PersistedEntity):
 
 class AccessTokenResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "Bearer"
     expires_in: int
 
@@ -50,3 +51,12 @@ class UserResponse(BaseModel):
     is_confirmed: bool
     avatar: HttpUrl | None
     model_config = ConfigDict(from_attributes=True)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str

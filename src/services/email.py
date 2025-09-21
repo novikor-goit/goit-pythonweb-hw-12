@@ -3,10 +3,8 @@ from pathlib import Path
 from fastapi import BackgroundTasks
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
-from starlette.datastructures import URL
 
 from src.conf.config import settings
-from src.services.crypt import create_jwt_token
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.MAIL_USERNAME,
@@ -23,27 +21,34 @@ conf = ConnectionConfig(
 )
 
 
-async def send_email(email: EmailStr, username: str, base_url: URL):
-    token = create_jwt_token(str(email))
+async def send_email(
+    email: EmailStr,
+    username: str,
+    host: str,
+    subject: str,
+    template_name: str,
+    template_body: dict,
+):
     message = MessageSchema(
-        subject="Confirm your email",
+        subject=subject,
         recipients=[email],
-        template_body={
-            "base_url": str(base_url).rstrip("/"),
-            "username": username,
-            "token": token,
-        },
+        template_body=template_body,
         subtype=MessageType.html,
     )
 
     fm = FastMail(conf)
-    await fm.send_message(message, template_name="email_confirmation.html")
+    await fm.send_message(message, template_name=template_name)
 
 
 def send_email_in_background(
     email: EmailStr,
     username: str,
-    base_url: URL,
+    host: str,
     background_tasks: BackgroundTasks,
+    subject: str,
+    template_name: str,
+    template_body: dict,
 ):
-    background_tasks.add_task(send_email, email, username, base_url)
+    background_tasks.add_task(
+        send_email, email, username, host, subject, template_name, template_body
+    )

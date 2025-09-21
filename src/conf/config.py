@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str
     ACCESS_TOKEN_LIFETIME_MINUTES: int
+    REFRESH_TOKEN_LIFETIME_DAYS: int = 7
     CRYPT_ALGORITHM: str = "bcrypt"
 
     MAIL_USERNAME: str = ""
@@ -28,6 +29,9 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: SecretStr
+
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
 
     model_config = SettingsConfigDict(env_file=".env")
 

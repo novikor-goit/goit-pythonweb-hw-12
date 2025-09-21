@@ -4,6 +4,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.dependencies import is_admin
 from src.api.schemas import UserResponse
 from src.database.models import User
 from src.database.session_manager import get_db
@@ -25,7 +26,7 @@ async def me(request: Request, user: User = Depends(get_current_user)):
     return user
 
 
-@router.patch("/avatar", response_model=UserResponse)
+@router.patch("/avatar", response_model=UserResponse, dependencies=[Depends(is_admin)])
 async def update_avatar(
     file: UploadFile = File(),
     user: User = Depends(get_current_user),

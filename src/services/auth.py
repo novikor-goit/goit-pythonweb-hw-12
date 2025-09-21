@@ -15,6 +15,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ) -> User:
+    """Decodes the access token, retrieves the user from the database, and returns the user object.
+
+    Args:
+        token (str, optional): The access token. Defaults to Depends(oauth2_scheme).
+        db (AsyncSession, optional): The database session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: If the token is invalid or the user is not found.
+
+    Returns:
+        User: The current user.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -23,6 +35,8 @@ async def get_current_user(
 
     try:
         payload = decode_jwt_token(token)
+        if payload.get("token_type") != "access":
+            raise credentials_exception
         username = payload["sub"]
         if username is None:
             raise credentials_exception

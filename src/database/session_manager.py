@@ -33,9 +33,17 @@ class DatabaseSessionManager:
             await session.close()
 
 
-sessionmanager = DatabaseSessionManager(settings.DB_URL)
+sessionmanager: "DatabaseSessionManager | None" = None
+
+
+def get_session_manager() -> "DatabaseSessionManager":
+    global sessionmanager
+    if sessionmanager is None:
+        sessionmanager = DatabaseSessionManager(settings.DB_URL)
+    return sessionmanager
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with sessionmanager.session() as session:
+    sm = get_session_manager()
+    async with sm.session() as session:
         yield session
